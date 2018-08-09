@@ -175,6 +175,12 @@ void vte_terminal_feed_child_binary(VteTerminal *terminal,
                                     const guint8 *data,
                                     gsize length) _VTE_GNUC_NONNULL(1);
 
+_VTE_PUBLIC
+void vte_terminal_connect_pty_read(VteTerminal *terminal);
+
+_VTE_PUBLIC
+void vte_terminal_disconnect_pty_read(VteTerminal *terminal);
+
 /* Copy currently-selected text to the clipboard, or from the clipboard to
  * the terminal. */
 _VTE_PUBLIC
@@ -190,6 +196,17 @@ _VTE_PUBLIC
 void vte_terminal_select_all(VteTerminal *terminal) _VTE_GNUC_NONNULL(1);
 _VTE_PUBLIC
 void vte_terminal_unselect_all(VteTerminal *terminal) _VTE_GNUC_NONNULL(1);
+_VTE_PUBLIC
+gboolean vte_terminal_get_selection_block_mode(VteTerminal *terminal) _VTE_GNUC_NONNULL(1);
+_VTE_PUBLIC
+void vte_terminal_set_selection_block_mode(VteTerminal *terminal,
+                                            gboolean block_mode) _VTE_GNUC_NONNULL(1);
+_VTE_PUBLIC
+void vte_terminal_select_text(VteTerminal *terminal, long start_col, long start_row,
+			      long end_col, long end_row) _VTE_GNUC_NONNULL(1);
+_VTE_PUBLIC
+char *
+vte_terminal_get_selection(VteTerminal *terminal) _VTE_GNUC_NONNULL(1);
 
 /* By-word selection */
 _VTE_PUBLIC
@@ -380,6 +397,16 @@ _VTE_PUBLIC
 void vte_terminal_get_cursor_position(VteTerminal *terminal,
 				      glong *column,
                                       glong *row) _VTE_GNUC_NONNULL(1);
+_VTE_PUBLIC
+void amos_vte_terminal_get_cursor_position(VteTerminal *terminal,
+                                           glong *column,
+                                           glong *row) _VTE_GNUC_NONNULL(1);
+
+_VTE_PUBLIC
+void vte_terminal_set_cursor_position(VteTerminal *terminal,
+                                      glong column,
+                                      glong row) _VTE_GNUC_NONNULL(1);
+
 
 _VTE_PUBLIC
 char *vte_terminal_hyperlink_check_event(VteTerminal *terminal,

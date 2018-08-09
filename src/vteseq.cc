@@ -1662,6 +1662,111 @@ Terminal::set_current_hyperlink(vte::parser::Sequence const& seq,
         m_defaults.attr.hyperlink_idx = idx;
 }
 
+static const char base64_digits[] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 62, 0, 0, 0,
+	63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0, 0, 0, -1, 0, 0, 0, 0, 1,
+	2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+	22, 23, 24, 25, 0, 0, 0, 0, 0, 0, 26, 27, 28, 29, 30, 31, 32, 33, 34,
+	35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+char
+base64dec_getc(const char **src)
+{
+	while (**src && !isprint(**src)) (*src)++;
+	return *((*src)++);
+}
+
+char *
+base64dec(const char *src, size_t in_len)
+{
+	char *result, *dst;
+
+	if (in_len % 4)
+		in_len += 4 - (in_len % 4);
+	result = dst = (char *)malloc(in_len / 4 * 3 + 1);
+	while (*src) {
+		int a = base64_digits[(unsigned char) base64dec_getc(&src)];
+		int b = base64_digits[(unsigned char) base64dec_getc(&src)];
+		int c = base64_digits[(unsigned char) base64dec_getc(&src)];
+		int d = base64_digits[(unsigned char) base64dec_getc(&src)];
+
+		*dst++ = (a << 2) | ((b & 0x30) >> 4);
+		if (c == -1)
+			break;
+		*dst++ = ((b & 0x0f) << 4) | ((c & 0x3c) >> 2);
+		if (d == -1)
+			break;
+		*dst++ = ((c & 0x03) << 6) | d;
+	}
+	*dst = '\0';
+	return result;
+}
+
+extern "C"
+{
+        void __attribute__((weak)) amos_show_completion(char *);
+}
+
+void
+Terminal::osc52_handler(vte::parser::Sequence const& seq,
+                        vte::parser::StringTokeniser::const_iterator& token,
+                        vte::parser::StringTokeniser::const_iterator const& endtoken) noexcept
+{
+        std::string a1, a2;
+        if (token != endtoken && token.size_remaining() > 0) {
+                a1 = *token;
+                ++token;
+        }
+        if (token != endtoken && token.size_remaining() > 0) {
+                a2 = *token;
+                ++token;
+        }
+        if (a2.empty()) {
+                fprintf(stderr, "erresc: invalid osc52\n");
+                return;
+        }
+        char *dec = base64dec(a2.data(), a2.size());
+        if (!dec) {
+                fprintf(stderr, "erresc: invalid base64\n");
+                return;
+        }
+        switch (a1[0]) {
+                char oscargs[65536];
+                case 'x':
+                        sprintf(oscargs, "luakit %s &", dec);
+                        free(dec);
+                        system(oscargs);
+                        break;
+                case 'y':
+                        sprintf(oscargs, "vivaldi %s &", dec);
+                        free(dec);
+                        system(oscargs);
+                        break;
+                case 'z':
+                        system(dec);
+                        free(dec);
+                        break;
+                case 'o':
+                        amos_show_completion(dec);
+                        free(dec);
+                        break;
+                default:
+                        gtk_clipboard_set_text(
+                                m_clipboard[VTE_SELECTION_PRIMARY],
+                                dec, strlen(dec));
+                        free(dec);
+                        break;
+        }
+}
+
 /*
  * Command Handlers
  * This is the unofficial documentation of all the VTE_CMD_* definitions.
@@ -6498,6 +6603,8 @@ Terminal::OSC(vte::parser::Sequence const& seq)
         case VTE_OSC_XTERM_LOGFILE:
         case VTE_OSC_XTERM_SET_FONT:
         case VTE_OSC_XTERM_SET_XSELECTION:
+                osc52_handler(seq, it, cend);
+                break;
         case VTE_OSC_XTERM_SET_COLOR_MODE:
         case VTE_OSC_XTERM_RESET_COLOR_MOUSE_CURSOR_FG:
         case VTE_OSC_XTERM_RESET_COLOR_MOUSE_CURSOR_BG:

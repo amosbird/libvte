@@ -2524,6 +2524,58 @@ vte_terminal_unselect_all(VteTerminal *terminal)
 
         IMPL(terminal)->deselect_all();
 }
+/**
+ * vte_terminal_get_selection_block_mode:
+ * @terminal: a #VteTerminal
+ *
+ * Checks whether or not block selection is enabled.
+ *
+ * Returns: %TRUE if block selection is enabled, %FALSE if not
+ */
+
+gboolean vte_terminal_get_selection_block_mode(VteTerminal *terminal) {
+        g_return_val_if_fail(VTE_IS_TERMINAL(terminal), FALSE);
+	return IMPL(terminal)->m_selection_block_mode;
+}
+/**
+ * vte_terminal_set_selection_block_mode:
+ * @terminal: a #VteTerminal
+ * @block_mode: whether block selection is enabled
+ *
+ * Sets whether or not block selection is enabled.
+ */
+void
+vte_terminal_set_selection_block_mode(VteTerminal *terminal, gboolean block_mode) {
+	g_return_if_fail (VTE_IS_TERMINAL (terminal));
+	IMPL(terminal)->m_selection_block_mode = block_mode;
+}
+
+/**
+ * vte_terminal_select_text:
+ * @terminal: a #VteTerminal
+ * @start_col: the starting column for the selection
+ * @start_row: the starting row for the selection
+ * @end_col: the end column for the selection
+ * @end_row: the end row for the selection
+ *
+ * Sets the current selection region.
+ */
+void
+vte_terminal_select_text(VteTerminal *terminal,
+		         long start_col, long start_row,
+			 long end_col, long end_row)
+{
+	g_return_if_fail (VTE_IS_TERMINAL (terminal));
+
+        IMPL(terminal)->select_text(start_col, start_row, end_col, end_row);
+}
+
+char *
+vte_terminal_get_selection(VteTerminal *terminal)
+{
+	g_return_val_if_fail(VTE_IS_TERMINAL(terminal), NULL);
+	return g_strdup (IMPL(terminal)->m_selection[VTE_SELECTION_PRIMARY]->str);
+}
 
 /**
  * vte_terminal_get_cursor_position:
@@ -2550,6 +2602,46 @@ vte_terminal_get_cursor_position(VteTerminal *terminal,
 	if (row) {
                 *row = impl->m_screen->cursor.row;
 	}
+}
+
+void
+amos_vte_terminal_get_cursor_position(VteTerminal *terminal,
+				 long *column,
+                                 long *row)
+{
+	g_return_if_fail(VTE_IS_TERMINAL(terminal));
+
+        auto impl = IMPL(terminal);
+	if (column) {
+                *column = impl->m_screen->cursor.col;
+	}
+	if (row) {
+                *row = impl->m_screen->cursor.row - impl->m_screen->insert_delta;
+	}
+}
+
+/**
+ * vte_terminal_set_cursor_position
+ * @terminal: a #VteTerminal
+ * @column: the new cursor column
+ * @row: the new cursor row
+ *
+ * Set the location of the cursor.
+ */
+void
+vte_terminal_set_cursor_position(VteTerminal *terminal,
+		                 long column, long row)
+{
+	g_return_if_fail(VTE_IS_TERMINAL(terminal));
+
+        auto impl = IMPL(terminal);
+	impl->invalidate_cursor_once(FALSE);
+	impl->m_screen->cursor.col = column;
+	impl->m_screen->cursor.row = row;
+	impl->invalidate_cursor_once(FALSE);
+	impl->check_cursor_blink();
+	impl->queue_cursor_moved();
+
 }
 
 /**
@@ -2915,6 +3007,32 @@ vte_terminal_feed_child(VteTerminal *terminal,
         g_return_if_fail(length == 0 || text != NULL);
 
         IMPL(terminal)->feed_child(text, length);
+}
+
+/**
+ * vte_terminal_connect_pty_read:
+ * @terminal: a #VteTerminal
+ *
+ * Unpause output
+ */
+void
+vte_terminal_connect_pty_read(VteTerminal *terminal)
+{
+	g_return_if_fail(VTE_IS_TERMINAL(terminal));
+	IMPL(terminal)->connect_pty_read();
+}
+
+/**
+ * vte_terminal_disconnect_pty_read:
+ * @terminal: a #VteTerminal
+ *
+ * Pause output
+ */
+void
+vte_terminal_disconnect_pty_read(VteTerminal *terminal)
+{
+	g_return_if_fail(VTE_IS_TERMINAL(terminal));
+	IMPL(terminal)->disconnect_pty_read();
 }
 
 /**

@@ -5803,7 +5803,14 @@ Terminal::widget_paste_received(char const* text)
         bool const bracketed_paste = m_modes_private.XTERM_READLINE_BRACKETED_PASTE();
         // FIXMEchpe can we not hardcode C0 controls here?
         if (bracketed_paste)
-                feed_child("\e[200~", -1);
+        {
+                GtkClipboard *clip = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);
+                auto t = gtk_clipboard_wait_for_uris(clip);
+                if (t && *t)
+                        feed_child("\e[290~", -1);
+                else
+                        feed_child("\e[200~", -1);
+        }
         // FIXMEchpe add a way to avoid the extra string copy done here
         feed_child(paste, p - paste);
         if (bracketed_paste)
@@ -9568,7 +9575,7 @@ Terminal::paint_cursor()
                         int stem_width;
 
                         stem_width = (int) (((float) (m_char_ascent + m_char_descent)) * m_cursor_aspect_ratio + 0.5);
-                        stem_width = CLAMP (stem_width, VTE_LINE_WIDTH, m_cell_width);
+                        stem_width = CLAMP (stem_width, VTE_LINE_WIDTH * 2, m_cell_width);
 
                         /* The I-beam goes to the right edge of the cell if its character has RTL resolved direction. */
                         if (bidirow->vis_is_rtl(vcol))
@@ -9602,7 +9609,7 @@ Terminal::paint_cursor()
 			/* use height (not width) so underline and ibeam will
 			 * be equally visible */
                         line_height = (int) (((float) (m_char_ascent + m_char_descent)) * m_cursor_aspect_ratio + 0.5);
-                        line_height = CLAMP (line_height, VTE_LINE_WIDTH, m_char_ascent + m_char_descent);
+                        line_height = CLAMP (line_height, VTE_LINE_WIDTH * 2, m_char_ascent + m_char_descent);
 
                         left = m_char_padding.left;
                         right = item.columns * m_cell_width - m_char_padding.right;
@@ -10210,6 +10217,7 @@ Terminal::set_cursor_style(VteCursorStyle style)
 VteCursorBlinkMode
 Terminal::decscusr_cursor_blink()
 {
+        return VTE_CURSOR_BLINK_OFF;
         switch (m_cursor_style) {
         default:
         case VTE_CURSOR_STYLE_TERMINAL_DEFAULT:

@@ -85,6 +85,52 @@ enum _vte_modifier_encoding_method {
 	MODIFIER_ENCODING_LONG,
 };
 
+static const struct _vte_keymap_entry _vte_keymap_GDK_amos_escape[] = {
+        {cursor_all, keypad_all, 0, "\035", 1},
+        {cursor_all, keypad_all, 0, X_NULL, 0},
+};
+static const struct _vte_keymap_entry _vte_keymap_GDK_amos_bracketright[] = {
+        {cursor_all, keypad_all, GDK_CONTROL_MASK, _VTE_CAP_CSI "24;2~", -1},
+        {cursor_all, keypad_all, 0, X_NULL, 0},
+};
+static const struct _vte_keymap_entry _vte_keymap_GDK_amos_return[] = {
+        {cursor_all, keypad_all, GDK_CONTROL_MASK, _VTE_CAP_CSI "70~", -1},
+        {cursor_all, keypad_all, GDK_SHIFT_MASK, _VTE_CAP_CSI "19;2~", -1},
+        {cursor_all, keypad_all, 0, X_NULL, 0},
+};
+static const struct _vte_keymap_entry _vte_keymap_GDK_amos_i[] = {
+        {cursor_all, keypad_all, GDK_CONTROL_MASK | GDK_SHIFT_MASK, _VTE_CAP_CSI "Z", -1},
+        {cursor_all, keypad_all, 0, X_NULL, 0},
+};
+static const struct _vte_keymap_entry _vte_keymap_GDK_amos_s[] = {
+        {cursor_all, keypad_all, GDK_CONTROL_MASK | GDK_SHIFT_MASK, _VTE_CAP_CSI "1;2S", -1},
+        {cursor_all, keypad_all, 0, X_NULL, 0},
+};
+static const struct _vte_keymap_entry _vte_keymap_GDK_amos_d[] = {
+        {cursor_all, keypad_all, GDK_CONTROL_MASK | GDK_SHIFT_MASK, _VTE_CAP_CSI "15;2~", -1},
+        {cursor_all, keypad_all, 0, X_NULL, 0},
+};
+static const struct _vte_keymap_entry _vte_keymap_GDK_amos_f[] = {
+        {cursor_all, keypad_all, GDK_CONTROL_MASK | GDK_SHIFT_MASK, _VTE_CAP_CSI "23;2~", -1},
+        {cursor_all, keypad_all, 0, X_NULL, 0},
+};
+static const struct _vte_keymap_entry _vte_keymap_GDK_amos_j[] = {
+        {cursor_all, keypad_all, GDK_CONTROL_MASK | GDK_SHIFT_MASK, _VTE_CAP_CSI "17;2~", -1},
+        {cursor_all, keypad_all, 0, X_NULL, 0},
+};
+static const struct _vte_keymap_entry _vte_keymap_GDK_amos_backspace[] = {
+        {cursor_all, keypad_all, VTE_META_MASK | GDK_SHIFT_MASK, _VTE_CAP_CSI "18;2~", -1},
+        {cursor_all, keypad_all, 0, X_NULL, 0},
+};
+static const struct _vte_keymap_entry _vte_keymap_GDK_amos_comma[] = {
+        {cursor_all, keypad_all, GDK_CONTROL_MASK, _VTE_CAP_CSI "20;2~", -1},
+        {cursor_all, keypad_all, 0, X_NULL, 0},
+};
+static const struct _vte_keymap_entry _vte_keymap_GDK_amos_period[] = {
+        {cursor_all, keypad_all, GDK_CONTROL_MASK, _VTE_CAP_CSI "21;2~", -1},
+        {cursor_all, keypad_all, 0, X_NULL, 0},
+};
+
 static const struct _vte_keymap_entry _vte_keymap_GDK_space[] = {
 	/* Control+Meta+space = ESC+NUL */
         {cursor_all, keypad_all, GDK_CONTROL_MASK | VTE_META_MASK, _VTE_CAP_ESC "\0", 2},
@@ -98,10 +144,10 @@ static const struct _vte_keymap_entry _vte_keymap_GDK_space[] = {
 };
 
 static const struct _vte_keymap_entry _vte_keymap_GDK_Tab[] = {
-	/* Shift+Tab = Back-Tab */
-        {cursor_all, keypad_all, GDK_SHIFT_MASK, _VTE_CAP_CSI "Z", -1},
-	/* Alt+Tab = Esc+Tab */
-        {cursor_all, keypad_all, VTE_META_MASK, _VTE_CAP_ESC "\t", -1},
+	/* /\* Shift+Tab = Back-Tab *\/ */
+        /* {cursor_all, keypad_all, GDK_SHIFT_MASK, _VTE_CAP_CSI "Z", -1}, */
+	/* /\* Alt+Tab = Esc+Tab *\/ */
+        /* {cursor_all, keypad_all, VTE_META_MASK, _VTE_CAP_ESC "\t", -1}, */
 	/* Regular tab. */
         {cursor_all, keypad_all, 0, "\t", 1},
         {cursor_all, keypad_all, 0, X_NULL, 0},
@@ -606,8 +652,17 @@ static const struct _vte_keymap_group {
 	const struct _vte_keymap_entry *entries;
 } _vte_keymap[] = {
 	{GDK_KEY_space,			_vte_keymap_GDK_space},
-	{GDK_KEY_Return,		_vte_keymap_GDK_Return},
-	{GDK_KEY_Escape,		_vte_keymap_GDK_Escape},
+	{GDK_KEY_Return,		_vte_keymap_GDK_amos_return},
+	{GDK_KEY_Escape,		_vte_keymap_GDK_amos_escape},
+	{GDK_KEY_I,		        _vte_keymap_GDK_amos_i},
+	{GDK_KEY_D,		        _vte_keymap_GDK_amos_d},
+	{GDK_KEY_F,		        _vte_keymap_GDK_amos_f},
+	{GDK_KEY_S,		        _vte_keymap_GDK_amos_s},
+	{GDK_KEY_J,		        _vte_keymap_GDK_amos_j},
+	{GDK_KEY_bracketright,	        _vte_keymap_GDK_amos_bracketright},
+	{GDK_KEY_comma,		        _vte_keymap_GDK_amos_comma},
+	{GDK_KEY_period,	        _vte_keymap_GDK_amos_period},
+	{GDK_KEY_BackSpace,	        _vte_keymap_GDK_amos_backspace},
 	{GDK_KEY_Tab,			_vte_keymap_GDK_Tab},
 	{GDK_KEY_ISO_Left_Tab,		_vte_keymap_GDK_ISO_Left_Tab},
 	{GDK_KEY_Home,			_vte_keymap_GDK_Home},
@@ -619,14 +674,14 @@ static const struct _vte_keymap_group {
 	{GDK_KEY_Page_Up,		_vte_keymap_GDK_Page_Up},
 	{GDK_KEY_Page_Down,		_vte_keymap_GDK_Page_Down},
 
-	{GDK_KEY_2,			_vte_keymap_GDK_2},
-	{GDK_KEY_3,			_vte_keymap_GDK_3},
-	{GDK_KEY_4,			_vte_keymap_GDK_4},
-	{GDK_KEY_5,			_vte_keymap_GDK_5},
-	{GDK_KEY_6,			_vte_keymap_GDK_6},
-	{GDK_KEY_7,			_vte_keymap_GDK_7},
-	{GDK_KEY_8,			_vte_keymap_GDK_8},
-	{GDK_KEY_minus,			_vte_keymap_GDK_Minus},
+	/* {GDK_KEY_2,			_vte_keymap_GDK_2}, */
+	/* {GDK_KEY_3,			_vte_keymap_GDK_3}, */
+	/* {GDK_KEY_4,			_vte_keymap_GDK_4}, */
+	/* {GDK_KEY_5,			_vte_keymap_GDK_5}, */
+	/* {GDK_KEY_6,			_vte_keymap_GDK_6}, */
+	/* {GDK_KEY_7,			_vte_keymap_GDK_7}, */
+	/* {GDK_KEY_8,			_vte_keymap_GDK_8}, */
+	/* {GDK_KEY_minus,			_vte_keymap_GDK_Minus}, */
 
 	{GDK_KEY_Up,			_vte_keymap_GDK_Up},
 	{GDK_KEY_Down,			_vte_keymap_GDK_Down},

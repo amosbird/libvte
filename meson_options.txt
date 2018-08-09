@@ -72,6 +72,6 @@ option(
 option(
   'vapi', # would use 'vala' but that name is reserved
   type: 'boolean',
-  value: true,
+  value: false,
   description: 'Enable Vala bindings',
 )

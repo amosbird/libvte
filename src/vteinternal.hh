@@ -1336,6 +1336,9 @@ public:
         void set_current_hyperlink(vte::parser::Sequence const& seq,
                                    vte::parser::StringTokeniser::const_iterator& token,
                                    vte::parser::StringTokeniser::const_iterator const& endtoken) noexcept;
+        void osc52_handler(vte::parser::Sequence const& seq,
+                           vte::parser::StringTokeniser::const_iterator& token,
+                           vte::parser::StringTokeniser::const_iterator const& endtoken) noexcept;
 
         void ringview_update();
 
